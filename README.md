@@ -1,5 +1,3 @@
-# lance_token
-
 ###USAGE
 > Firstly you should have a redis in your machine.
 
