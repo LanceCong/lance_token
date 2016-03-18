@@ -1,6 +1,6 @@
 {
   "name": "lance_token",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A token based authentication system for mobile app or H5 application.It contains token and refresh token,store in redis.",
   "main": "index.js",
   "scripts": {

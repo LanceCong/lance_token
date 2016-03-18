@@ -19,10 +19,10 @@ module.exports = function(config){
      * 生成token
      * @param app
      * @param uid
-     * @param sso
+     * @param isinit
      * @param callback
      */
-    var gen = function(app,uid,sso,remark,callback){
+    var gen = function(app,uid,isinit,remark,callback){
         var mainkey = app+':'+uid;
         var token = uuid.v4().replace(/\-/g,"");
         const mToken = token;
@@ -66,7 +66,7 @@ module.exports = function(config){
 
                 var jsonOldMainvalue = JSON.parse(reply);//{token1:{},token2:{},token3:{}}
 
-                if(sso == 1){
+                if(isinit == 1){
                     //单点登陆
                     client.set(mainkey,JSON.stringify(mainvalue),function(err,reply){
                         if(err){
