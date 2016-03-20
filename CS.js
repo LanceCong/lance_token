@@ -36,8 +36,8 @@ module.exports = {
 
 
 
-
-
+    /**单端登录-排他*/
+    ,SINGLE_SIGN_IN:1
 
 
 

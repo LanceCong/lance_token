@@ -1,29 +1,43 @@
-/** A token pool module.Support sso.mso.single sing on.multi sing on.
+/** 一个token认证、管理模块。
+ * 1)提供token、refresh_token
+ * 2）token默认2小时失效，失效时候使用refresh_token调用刷新方法刷新token，即可延长2小时.刷新方法每天只能调用12次
+ * 3）默认连续超过7天不使用token，其对于的refresh_token将会过期，refresh_token过期后，引导用户重新登录。
  * Created by lance on 16-3-18.
  */
 var redis = require("redis"),
     client = redis.createClient();
 var CS = require('./CS');
+var CM = require('./CM');
 var date_util = require('./date_util');
 var uuid = require('node-uuid');
 
 module.exports = function(config){
-    /**token expire in.Unit:seconds.default in 7200 = 2hours*/
-    const TOKEN_EXPIRE_IN = typeof config.token_expire_in == "number" ? config.token_expire_in :2*60*60;
-    /**refresh token expire in.Unit:seconds.default in 7days*/
-    const REFRESH_EXPIRE_IN = typeof config.refresh_expire_in == "number" ? config.token_expire_in :7*24*60*60;
-    /**max refresh times in a day*/
-    const MAX_REFRESH_TIMES = typeof config.max_refresh_times == "number" ? config.max_refresh_times :12;
-
+    config = config == undefined ? {}:config;
+    /** token过期时间，默认2小时 */
+    const TOKEN_EXPIRE_IN = (config.token_expire_in == undefined) ? 2*60*60 : config.token_expire_in;
+    /** refresh token 过期时间，默认7天 */
+    const REFRESH_EXPIRE_IN = (config.refresh_expire_in == undefined) ? 7*24*60*60 : config.refresh_expire_in;
+    /** token一天内最大刷新次数 */
+    const MAX_REFRESH_TIMES = (config.max_refresh_times == undefined) ? 12 : config.max_refresh_times;
+    /** app 的名称，建议英文 */
+    const APP_NAME = config.app == undefined ? 'default': config.app;
+    
     /**
-     * 生成token
-     * @param app
-     * @param uid
-     * @param isinit
+     * 
+     * @param params ->
+     * {app:'app的名称'
+     * ,uid:'用户的唯一id'
+     * ,single:1 单端登录，其他是多端模式
+     * ,remark:'备注'
+     * }
      * @param callback
      */
-    var gen = function(app,uid,isinit,remark,callback){
-        var mainkey = app+':'+uid;
+    var gen = function(params,callback){
+        if(CM.checkNull(params,['uid','remark'],callback)){
+            return;
+        }
+        var app = params.app == undefined ? APP_NAME:params.app;
+        var mainkey = app+':'+params.uid;
         var token = uuid.v4().replace(/\-/g,"");
         const mToken = token;
         var refresh_token = uuid.v4().replace(/\-/g,"");
@@ -36,7 +50,7 @@ module.exports = function(config){
             ,refresh_times:0//今天刷新的次数
             ,last_token_timestamp:today//token最新使用时间。记录当天的0点，都是今天用，不用去加refresh_token expire
             ,last_refresh_token_timestamp:today//refresh 使用时间。也是0点.都是今天用，要加1
-            ,remark:(remark == null || remark == undefined)?'':remark
+            ,remark:(params.remark == undefined)?'':params.remark
         };
         var mainvalue = {};
         mainvalue[token] = tokenInfo;
@@ -66,7 +80,7 @@ module.exports = function(config){
 
                 var jsonOldMainvalue = JSON.parse(reply);//{token1:{},token2:{},token3:{}}
 
-                if(isinit == 1){
+                if(params.single == CS.SINGLE_SIGN_IN){
                     //单点登陆
                     client.set(mainkey,JSON.stringify(mainvalue),function(err,reply){
                         if(err){
@@ -108,16 +122,16 @@ module.exports = function(config){
 
     /**
      * 刷新token
-     * @param app
-     * @param uid
-     * @param token
-     * @param refresh_token
+     * @param params app可选，uid用户唯一id，token，refresh_token
      * @param callback
      */
-    var refresh = function(app,uid,token,refresh_token,callback){
-        var mainkey = app+':'+uid;
+    var refresh = function(params,callback){
+        if(CM.checkNull(params,['uid','token','refresh_token'],callback)){
+            return;
+        }
+        var app = params.app == undefined ? APP_NAME:params.app;
+        var mainkey = app+':'+params.uid;
         var currentTime = date_util.getNowTimestamp();
-
         client.get(mainkey,function(err,reply){
             if(err){
                 callback(CS.DB_FAIL,'redis error');
@@ -127,11 +141,11 @@ module.exports = function(config){
                 callback(CS.INVALID_PARAMS,'appid:uid not exist');
             }else {
                 var jsonMainvalue = JSON.parse(reply);//{token1:{},token2:{},token3:{}}
-                var tokenInfo = jsonMainvalue[token];
+                var tokenInfo = jsonMainvalue[params.token];
                 if(tokenInfo == undefined){
                     callback(CS.TOKEN_INCORRECT,'token incorrect');
                 }else{
-                    if(tokenInfo.refresh_token != refresh_token){
+                    if(tokenInfo.refresh_token != params.refresh_token){
                         callback(CS.REFRESHTOKEN_INCORRECT,'refresh_token incorrect');
                     }else {
                         if(tokenInfo.refresh_expire_time < currentTime){
@@ -149,7 +163,7 @@ module.exports = function(config){
                                 }
                                 tokenInfo.last_refresh_token_timestamp = today;//今天0点
                                 //
-                                jsonMainvalue[token] = tokenInfo;
+                                jsonMainvalue[params.token] = tokenInfo;
                                 client.set(mainkey,JSON.stringify(jsonMainvalue),function(err,reply){
                                     if(err){
                                         callback(CS.DB_FAIL,'add error');
@@ -166,16 +180,17 @@ module.exports = function(config){
         });
     };
 
-    /***
+    /**
      * 校验token
-     * @param app
-     * @param uid
-     * @param token
+     * @param params
      * @param callback
      */
-    var valid = function(app,uid,token,callback){
-        var mainkey = app+':'+uid;
-        var token = token;
+    var valid = function(params,callback){
+        if(CM.checkNull(params,['uid','token'],callback)){
+            return;
+        }
+        var app = params.app == undefined ? APP_NAME:params.app;
+        var mainkey = app+':'+params.uid;
         var currentTime = date_util.getNowTimestamp();
         var today = date_util.getToday();
 
@@ -188,7 +203,7 @@ module.exports = function(config){
                 callback(CS.INVALID_PARAMS,'appid:uid not exist');
             }else {
                 var jsonMainvalue = JSON.parse(reply);//{token1:{},token2:{},token3:{}}
-                var tokenInfo = jsonMainvalue[token];
+                var tokenInfo = jsonMainvalue[params.token];
                 if(tokenInfo == undefined){
                     callback(CS.TOKEN_INCORRECT,'token incorrect');
                 }else{
@@ -208,15 +223,17 @@ module.exports = function(config){
         });
     };
 
-    /***
+    /**
      * 强制无效token
-     * @param app
-     * @param uid
-     * @param token
+     * @param params
      * @param callback
      */
-    var del = function(app,uid,token,callback){
-        var mainkey = app+':'+uid;
+    var del = function(params,callback){
+        if(CM.checkNull(params,['uid','token'],callback)){
+            return;
+        }
+        var app = params.app == undefined ? APP_NAME:params.app;
+        var mainkey = app+':'+params.uid;
 
         client.get(mainkey,function(err,reply){
             if(err){
@@ -227,11 +244,11 @@ module.exports = function(config){
                 callback(CS.INVALID_PARAMS,'appid:uid not exist');
             }else {
                 var jsonMainvalue = JSON.parse(reply);//{token1:{},token2:{},token3:{}}
-                var tokenInfo = jsonMainvalue[token];
+                var tokenInfo = jsonMainvalue[params.token];
                 if(tokenInfo == undefined){
                     callback(CS.TOKEN_INCORRECT,'token incorrect');
                 }else{
-                    delete jsonMainvalue[token];
+                    delete jsonMainvalue[params.token];
                     //更新到redis
                     client.set(mainkey,JSON.stringify(jsonMainvalue),function(err,replay){
                         if(err){
