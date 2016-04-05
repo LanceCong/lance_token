@@ -33,7 +33,7 @@ module.exports = function(config){
      * @param callback
      */
     var gen = function(params,callback){
-        if(CM.checkNull(params,['uid','remark'],callback)){
+        if(CM.checkNull(params,['uid'],callback)){
             return;
         }
         var app = params.app == undefined ? APP_NAME:params.app;
