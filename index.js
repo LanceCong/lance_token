@@ -262,6 +262,7 @@ module.exports = function(config){
         });
     };
 
+    //export
     var lanceToken = {
         gen:gen
         ,refresh:refresh
