@@ -38,3 +38,8 @@ lanceToken.gen({uid:'000',remark:'remark'},function(c,info){
 
 
 });
+
+//console.log('查找全部');
+//lanceToken.getall({app:'test',uid:'000'},function(c,d){
+//    console.log(d)
+//})

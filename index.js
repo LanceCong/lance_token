@@ -262,12 +262,34 @@ module.exports = function(config){
         });
     };
 
+    var getall = function(params,callback){
+        if(CM.checkNull(params,['uid','app'],callback)){
+            return;
+        }
+        var app = params.app == undefined ? APP_NAME:params.app;
+        var mainkey = app+':'+params.uid;
+
+        client.get(mainkey,function(err,reply){
+            console.log(reply);
+            if(err){
+                callback(CS.DB_FAIL,'redis error');
+                return;
+            }
+            if(reply == null){
+                callback(CS.INVALID_PARAMS,'appid:uid not exist');
+            }else {
+                callback(CS.SUCCESS,reply)
+            }
+        });
+    };
+
     //export
     var lanceToken = {
         gen:gen
         ,refresh:refresh
         ,valid:valid
         ,del:del
+        ,getall:getall
 
     };
     return lanceToken;
