@@ -168,7 +168,7 @@ module.exports = function(config){
                                     if(err){
                                         callback(CS.DB_FAIL,'add error');
                                     } else{
-                                        callback(CS.SUCCESS,'');
+                                        callback(CS.SUCCESS,jsonMainvalue);
                                     }
                                 });
 
