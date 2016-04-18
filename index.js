@@ -168,7 +168,11 @@ module.exports = function(config){
                                     if(err){
                                         callback(CS.DB_FAIL,'add error');
                                     } else{
-                                        callback(CS.SUCCESS,jsonMainvalue);
+                                        var reJson = {
+                                            token:params.token
+                                            ,tokeninfo:jsonMainvalue[params.token]
+                                        };
+                                        callback(CS.SUCCESS,reJson);
                                     }
                                 });
 
