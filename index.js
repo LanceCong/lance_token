@@ -160,6 +160,9 @@ module.exports = function(config){
                                 if(tokenInfo.last_refresh_token_timestamp == today){
                                     //今天重复使用，+1
                                     tokenInfo.refresh_times = (tokenInfo.refresh_times+1);
+                                }else{
+                                    //隔天之后，
+                                    tokenInfo.refresh_times = 1;
                                 }
                                 tokenInfo.last_refresh_token_timestamp = today;//今天0点
                                 //
