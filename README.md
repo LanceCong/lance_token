@@ -126,3 +126,6 @@ Here is another repository:<a target="_blank" href="https://github.com/LanceCong
 you counld use this authentication system by local http request,and it clound be fast(may cost you 3ms) and whatever language you are using.
 
 #### Apologize for my poor English...Any question you could open a issue(if you a Chinese guy just in Chinese)
+
+# TODO
+* change the token and refresh token after refreshed.(the old token could still work for several seconds.) where not in single model
