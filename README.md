@@ -1,4 +1,9 @@
-###USAGE
+### How it works
+This authentication system would generate <span>token</span> and <span>refresh token</span> by your application's user id.
+The token would be invalid after specified seconds(default 7200s)
+The refresh_token is used for refresh your expired token.And the refresh_token would expired too if user don't use the token for too long time(default 7 days).
+
+### USAGE
 > Firstly you should have a redis in your machine.
 
 ##### STEP 1: install
@@ -69,7 +74,7 @@ lanceToken.gen('test','000',0,'',function(c,info){
 
 ```
 
-* gen(app,uid,isInit,remark,callback(code,info))
+* gen(app,uid,single,remark,callback(code,info))
 * refresh(app,uid,token,refresh_token,callback(code,info))
 * valid(app,uid,token,callback(code,info))
 * del(app,uid,token,callback(code,info))
@@ -77,11 +82,11 @@ lanceToken.gen('test','000',0,'',function(c,info){
 ```js
 // app: application name
 // uid: user's id
-// isInit: 1:clear all old token;others:add a new token
-// remark: token's remake
+// single: 1:clear all old token;others:add a new token
+// remark: token's remake。eg:android,ios,mobile h5,pc
 //callback(code,info)
 
-//all code
+//all result code
 var CS = {
  /** 成功 */
     SUCCESS: 0
@@ -116,4 +121,8 @@ var CS = {
 }
 ```
 
-#### Apologize for my poor English...I will optimize the readme.md as soon
+# Cross-platform usage
+Here is another repository:<a target="_blank" href="https://github.com/LanceCong/http_authentication_system">https://github.com/LanceCong/http_authentication_system<a/>(developing)
+you counld use this authentication system by local http request,and it clound be fast(may cost you 3ms) and whatever language you are using.
+
+#### Apologize for my poor English...Any question you could open a issue(if you a Chinese guy just in Chinese)
