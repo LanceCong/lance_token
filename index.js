@@ -34,6 +34,7 @@ module.exports = function(config){
      */
     var gen = function(params,callback){
         if(CM.checkNull(params,['uid'],callback)){
+            callback(CS.MISS_PARAMS,'miss parameters');
             return;
         }
         var app = params.app == undefined ? APP_NAME:params.app;
@@ -127,6 +128,7 @@ module.exports = function(config){
      */
     var refresh = function(params,callback){
         if(CM.checkNull(params,['uid','token','refresh_token'],callback)){
+            callback(CS.MISS_PARAMS,'miss parameters');
             return;
         }
         var app = params.app == undefined ? APP_NAME:params.app;
@@ -194,6 +196,7 @@ module.exports = function(config){
      */
     var valid = function(params,callback){
         if(CM.checkNull(params,['uid','token'],callback)){
+            callback(CS.MISS_PARAMS,'miss parameters');
             return;
         }
         var app = params.app == undefined ? APP_NAME:params.app;
@@ -237,6 +240,7 @@ module.exports = function(config){
      */
     var del = function(params,callback){
         if(CM.checkNull(params,['uid','token'],callback)){
+            callback(CS.MISS_PARAMS,'miss parameters');
             return;
         }
         var app = params.app == undefined ? APP_NAME:params.app;
@@ -271,6 +275,7 @@ module.exports = function(config){
 
     var getall = function(params,callback){
         if(CM.checkNull(params,['uid','app'],callback)){
+            callback(CS.MISS_PARAMS,'miss parameters');
             return;
         }
         var app = params.app == undefined ? APP_NAME:params.app;
