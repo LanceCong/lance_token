@@ -3,6 +3,9 @@
  */
 var lanceToken = require('./index')({
     app:'test'
+    ,redis_options:{
+
+    }
 });
 var token = '';
 var refresh_token = '';

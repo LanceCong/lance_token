@@ -4,8 +4,8 @@
  * 3）默认连续超过7天不使用token，其对于的refresh_token将会过期，refresh_token过期后，引导用户重新登录。
  * Created by lance on 16-3-18.
  */
-var redis = require("redis"),
-    client = redis.createClient();
+var redis = require("redis");
+var client;
 var CS = require('./CS');
 var CM = require('./CM');
 var date_util = require('./date_util');
@@ -21,6 +21,8 @@ module.exports = function(config){
     const MAX_REFRESH_TIMES = (config.max_refresh_times == undefined) ? 12 : config.max_refresh_times;
     /** app 的名称，建议英文 */
     const APP_NAME = config.app == undefined ? 'default': config.app;
+
+    client = redis.createClient(config.redis_options == undefined ? {}:config.redis_options);
     
     /**
      * 

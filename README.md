@@ -71,7 +71,7 @@ lanceToken.gen('test','000',0,'',function(c,info){
 // max_refresh_times:The max times of refresh the token in a day.
  //  token_expire_in:Token will expire after this numbers of seconds pass
 //   refresh_expire_in:Refresh token will expire after this numbers of seconds pass
-
+//redis_options,just see :https://github.com/NodeRedis/node_redis#options-object-properties
 ```
 
 * gen(app,uid,single,remark,callback(code,info))
