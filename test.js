@@ -4,7 +4,8 @@
 var lanceToken = require('./index')({
     app:'test'
     ,redis_options:{
-
+        port:6379
+        ,password:''
     }
 });
 var token = '';

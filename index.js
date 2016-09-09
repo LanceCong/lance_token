@@ -54,6 +54,7 @@ module.exports = function(config){
             ,last_token_timestamp:today//token最新使用时间。记录当天的0点，都是今天用，不用去加refresh_token expire
             ,last_refresh_token_timestamp:today//refresh 使用时间。也是0点.都是今天用，要加1
             ,remark:(params.remark == undefined)?'':params.remark
+            ,extend:(params.extend == undefined)?'':params.extend
         };
         var mainvalue = {};
         mainvalue[token] = tokenInfo;
