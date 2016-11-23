@@ -9,7 +9,7 @@ var client;
 var CS = require('./CS');
 var CM = require('./CM');
 var date_util = require('./date_util');
-var uuid = require('node-uuid');
+var uuid = require('uuid');
 
 module.exports = function(config){
     config = config == undefined ? {}:config;
